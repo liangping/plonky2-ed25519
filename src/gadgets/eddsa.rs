@@ -163,6 +163,7 @@ mod tests {
         timing.print();
         timing.push("prove", Level::Info);
         let proof = data.prove(pw).unwrap();
+        println!("end prove{:?}", SystemTime::now());
         timing.print();
 
         data.verify(proof)
