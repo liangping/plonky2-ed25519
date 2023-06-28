@@ -204,7 +204,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
+    // #[ignore]
     fn test_eddsa_circuit_wide() -> Result<()> {
         test_eddsa_circuit_with_config(CircuitConfig::wide_ecc_config())
     }
