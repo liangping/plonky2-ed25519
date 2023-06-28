@@ -116,6 +116,7 @@ pub fn fill_circuits<F: RichField + Extendable<D>, const D: usize>(
 
 #[cfg(test)]
 mod tests {
+    use std::time::SystemTime;
     use anyhow::Result;
     use log::Level;
     use plonky2::iop::witness::PartialWitness;
@@ -129,7 +130,7 @@ mod tests {
     use crate::gadgets::eddsa::{fill_circuits, make_verify_circuits};
 
     fn test_eddsa_circuit_with_config(config: CircuitConfig) -> Result<()> {
-        println!("start...");
+        println!("start..., {:?}", SystemTime::now());
         let mut timing = TimingTree::new("start", Level::Info);
         timing.push("initial", Level::Info);
         const D: usize = 2;
@@ -140,11 +141,11 @@ mod tests {
         let mut builder = CircuitBuilder::<F, D>::new(config);
         timing.print();
 
-        println!("start make circuits");
+        println!("start make circuits{:?}", SystemTime::now() );
         timing.pop();
         timing.push("circuit", Level::Info);
         let targets = make_verify_circuits(&mut builder, SAMPLE_MSG1.len());
-        println!("end make circuits");
+        println!("end make circuits {:?}", SystemTime::now());
         timing.print();
 
         fill_circuits::<F, D>(
@@ -155,10 +156,10 @@ mod tests {
             &targets,
         );
         timing.print();
-        println!("start fill circuits");
+        println!("start fill circuits{:?}", SystemTime::now());
         dbg!(builder.num_gates());
         let data = builder.build::<C>();
-        println!("start prove");
+        println!("start prove{:?}", SystemTime::now());
         timing.print();
         timing.push("prove", Level::Info);
         let proof = data.prove(pw).unwrap();
