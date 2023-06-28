@@ -163,10 +163,8 @@ mod tests {
         timing.push("prove", Level::Info);
         let proof = data.prove(pw).unwrap();
         timing.print();
-        timing.pop();
-        timing.push("verify", Level::Info);
-        data.verify(proof);
-        timing.print();
+
+        data.verify(proof)
     }
 
     fn test_eddsa_circuit_with_config_failure(config: CircuitConfig) {
