@@ -117,10 +117,12 @@ pub fn fill_circuits<F: RichField + Extendable<D>, const D: usize>(
 #[cfg(test)]
 mod tests {
     use anyhow::Result;
+    use log::Level;
     use plonky2::iop::witness::PartialWitness;
     use plonky2::plonk::circuit_builder::CircuitBuilder;
     use plonky2::plonk::circuit_data::CircuitConfig;
     use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
+    use plonky2::util::timing::TimingTree;
     use rand::Rng;
 
     use crate::curve::eddsa::{SAMPLE_MSG1, SAMPLE_PK1, SAMPLE_SIG1};
@@ -128,16 +130,22 @@ mod tests {
 
     fn test_eddsa_circuit_with_config(config: CircuitConfig) -> Result<()> {
         println!("start...");
+        let mut timing = TimingTree::new("start", Level::Info);
+        timing.push("initial", Level::Info);
         const D: usize = 2;
         type C = PoseidonGoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
 
         let mut pw = PartialWitness::new();
         let mut builder = CircuitBuilder::<F, D>::new(config);
+        timing.print();
 
         println!("start make circuits");
+        timing.pop();
+        timing.push("circuit", Level::Info);
         let targets = make_verify_circuits(&mut builder, SAMPLE_MSG1.len());
         println!("end make circuits");
+        timing.print();
 
         fill_circuits::<F, D>(
             &mut pw,
@@ -146,13 +154,19 @@ mod tests {
             SAMPLE_PK1.as_slice(),
             &targets,
         );
-
+        timing.print();
         println!("start fill circuits");
         dbg!(builder.num_gates());
         let data = builder.build::<C>();
         println!("start prove");
+        timing.print();
+        timing.push("prove", Level::Info);
         let proof = data.prove(pw).unwrap();
-        data.verify(proof)
+        timing.print();
+        timing.pop();
+        timing.push("verify", Level::Info);
+        data.verify(proof);
+        timing.print();
     }
 
     fn test_eddsa_circuit_with_config_failure(config: CircuitConfig) {
