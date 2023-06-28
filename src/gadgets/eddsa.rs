@@ -127,6 +127,7 @@ mod tests {
     use crate::gadgets::eddsa::{fill_circuits, make_verify_circuits};
 
     fn test_eddsa_circuit_with_config(config: CircuitConfig) -> Result<()> {
+        println!("start...");
         const D: usize = 2;
         type C = PoseidonGoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
@@ -134,7 +135,9 @@ mod tests {
         let mut pw = PartialWitness::new();
         let mut builder = CircuitBuilder::<F, D>::new(config);
 
+        println!("start make circuits");
         let targets = make_verify_circuits(&mut builder, SAMPLE_MSG1.len());
+        println!("end make circuits");
 
         fill_circuits::<F, D>(
             &mut pw,
@@ -144,8 +147,10 @@ mod tests {
             &targets,
         );
 
+        println!("start fill circuits");
         dbg!(builder.num_gates());
         let data = builder.build::<C>();
+        println!("start prove");
         let proof = data.prove(pw).unwrap();
         data.verify(proof)
     }
@@ -180,7 +185,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
+    // #[ignore]
     fn test_eddsa_circuit_narrow() -> Result<()> {
         test_eddsa_circuit_with_config(CircuitConfig::standard_ecc_config())
     }
